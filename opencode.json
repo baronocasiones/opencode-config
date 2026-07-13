@@ -1,0 +1,56 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "github-copilot": {
+      "enabled": true
+    }
+  },
+  "mcp": {
+    "server-filesystem": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/mnt/hdd/repo/",
+        "~/.config/",
+        "/mnt/hdd/Downloads/"
+      ]
+    },
+    "github-mcp": {
+      "type": "remote",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "enabled": false,
+      "headers": {
+        "Authorization": "Bearer {env:GITHUB_MCP_TOKEN}"
+      }
+    },
+    "context7-mcp": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "oauth": {}
+    },
+    "google-stitch-mcp": {
+      "type": "remote",
+      "url": "https://stitch.googleapis.com/mcp",
+      "oauth": {},
+      "headers": {
+          "X-Goog-Api-Key": "{env:GOOGLE_STITCH_MCP_TOKEN}"
+      },
+      "timeout": 120000
+    },
+    "framelink-figma-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "figma-developer-mcp", "--figma-api-key={env:FIGMA_MCP_TOKEN}", "--stdio"],
+      "enabled": true
+    },
+    "chrome-devtools-mcp": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
+    }
+  }
+}

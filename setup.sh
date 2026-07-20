@@ -66,8 +66,10 @@ else
   if [ -d "$TARGET_DIR" ]; then
     HAS_UNPUSHED=0
     if [ -d "${TARGET_DIR}/.git" ]; then
-      git -C "$TARGET_DIR" log --oneline @{u}..HEAD 2>/dev/null | grep -q . && HAS_UNPUSHED=1
-      git -C "$TARGET_DIR" status --porcelain 2>/dev/null | grep -q . && HAS_UNPUSHED=1
+      if git -C "$TARGET_DIR" rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+        git -C "$TARGET_DIR" log --oneline @{u}..HEAD 2>/dev/null | grep -q . && HAS_UNPUSHED=1 || true
+      fi
+      git -C "$TARGET_DIR" status --porcelain 2>/dev/null | grep -q . && HAS_UNPUSHED=1 || true
     fi
 
     warn "${TARGET_DIR} already exists!"

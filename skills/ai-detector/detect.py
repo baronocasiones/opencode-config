@@ -12,8 +12,6 @@ import sys
 import json
 import re
 import math
-import os
-import textwrap
 
 HEURISTIC_WEIGHTS = {
     'burstiness': 0.20,

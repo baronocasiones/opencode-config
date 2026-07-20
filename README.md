@@ -18,6 +18,17 @@ That single command will:
 5. Install external skills (humanizer, terminal-skills, etc.)
 6. Print a summary of what's installed and what's missing
 
+### Platform support
+
+| OS/Shell | Status |
+|---|---|
+| Linux (Debian/Ubuntu) | ✅ Full support via `apt-get` |
+| Linux (Arch) | ✅ Full support via `pacman` |
+| macOS | ✅ Full support via `brew` |
+| Windows (Git Bash/MSYS2) | ✅ Full support via `choco` |
+| Windows (WSL) | ✅ Runs as native Linux (uses WSL's `apt-get`) |
+| Windows (PowerShell/cmd) | ❌ Not supported — use Git Bash or WSL |
+
 If you're already at `~/.config/opencode`, the relocation step is skipped.
 
 ### Flags
@@ -26,7 +37,7 @@ If you're already at `~/.config/opencode`, the relocation step is skipped.
 |---|---|
 | `-y` / `--yes` | Skip all prompts (auto-confirm overwrite) |
 | `--with-python` | Install Python ML packages (transformers, torch) + PDF tools |
-| `--with-system` | Install system packages (poppler-utils, qpdf, tesseract-ocr) |
+| `--with-system` | Install system packages (poppler/qpdf/tesseract) |
 
 All three can be combined:
 ```bash
@@ -40,11 +51,11 @@ The script runs in 8 phases:
 | Phase | Step | Description |
 |---|---|---|
 | **1** | **Auto-relocation** | Detects if the clone lives outside `~/.config/opencode`, renames it to `opencode`, and moves it there. Checks for unpushed/dirty git state before overwriting. Re-execs from the new location. |
-| **2** | **Prerequisites** | Checks for `node`, `npm`/`bun`, and `python3`. |
+| **2** | **Prerequisites** | Checks for `node`, `npm`/`bun`, and Python (`python3` → falls back to `python` on Windows). |
 | **3** | **npm dependencies** | Runs `npm install` (or `bun install`) to install the OpenCode plugin. |
 | **4** | **Skill installation** | Installs external skills (humanizer via `skills add`, optional skills via `terminal-skills`). |
 | **5** | **Python deps** | (optional) Installs `transformers`, `torch`, `pypdf`, `pdfplumber`, `reportlab`. |
-| **6** | **System deps** | (optional) Installs `poppler-utils`, `qpdf`, `tesseract-ocr`. |
+| **6** | **System deps** | (optional) Auto-detects package manager: `apt-get` → `pacman` → `brew` → `choco`. Installs `poppler`/`qpdf`/`tesseract` with correct package names per platform. |
 | **7** | **Environment vars** | Checks for required env vars (`FIGMA_MCP_TOKEN`, `GOOGLE_STITCH_MCP_TOKEN`) and creates `.env.example`. |
 | **8** | **Summary** | Lists all found skills (in-repo + external) and next steps. |
 
@@ -68,6 +79,7 @@ This config uses the `@opencode-ai/plugin` npm package (v1.3.17), tracked in `pa
 
 | Skill | Source | Purpose |
 |---|---|---|
+| **ai-image-generation** | [skills-collective/skills](https://github.com/skills-collective/skills) | Image generation via RunComfy CLI — FLUX 2, GPT Image 2, Seedream 5, and more. Used by the image-media-agent subagent. |
 | **humanizer** | [blader/humanizer](https://github.com/blader/humanizer) | Strips AI writing patterns from text. Removes inflated symbolism, promotional language, em dash overuse, hedging, and other detectable signals. |
 | **caveman** | terminal-skills | Ultra-compressed communication mode (cuts token usage ~75%). |
 | **create-readme** | terminal-skills | Creates README documentation for projects. |
@@ -107,7 +119,7 @@ This config uses the `@opencode-ai/plugin` npm package (v1.3.17), tracked in `pa
 | **devops-agent** | CI/CD, Docker, deployment. |
 | **security-reviewer** | Code/config/dependency vulnerability audits. |
 | **accessibility-reviewer** | WCAG and inclusive design audits. |
-| **image-media-agent** | Diagrams, illustrations, visual assets. |
+| **image-media-agent** | Diagrams, illustrations, visual assets + AI image generation via RunComfy (FLUX 2, GPT Image 2, etc.). |
 | **project-context-loader** | Project documentation loading and caching. |
 
 ## MCP Servers

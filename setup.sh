@@ -144,20 +144,6 @@ header "Installing skills"
 
 mkdir -p "$SKILLS_TARGET"
 
-install_skill_via_npx() {
-  local skill_name="$1"
-  local npx_pkg="$2"
-  if [ ! -d "${SKILLS_TARGET}/${skill_name}" ]; then
-    echo "  Installing ${skill_name}..."
-    if npx "$npx_pkg" 2>/dev/null; then
-      info "${skill_name} installed"
-    else
-      warn "Could not install ${skill_name} — skipping"
-    fi
-  else
-    info "${skill_name} already installed"
-  fi
-}
 
 # Humanizer — the most critical skill
 if [ ! -d "${SKILLS_TARGET}/humanizer" ]; then

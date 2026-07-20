@@ -25,6 +25,7 @@ echo -e "${CYAN}
 AUTO_YES=0
 WITH_PYTHON=0
 WITH_SYSTEM=0
+ORIGINAL_ARGS=("$@")
 REMAINING_ARGS=()
 for arg in "$@"; do
   case "$arg" in
@@ -98,14 +99,17 @@ else
   mkdir -p "${HOME}/.config"
   if ! mv "$SCRIPT_DIR" "$TARGET_DIR" 2>/dev/null; then
     echo "  Cross-filesystem move detected, using copy..."
-    cp -a "$SCRIPT_DIR" "$TARGET_DIR" && rm -rf "$SCRIPT_DIR"
+    cp -a "$SCRIPT_DIR" "$TARGET_DIR" && rm -rf "$SCRIPT_DIR" || {
+      err "Failed to copy directory to ${TARGET_DIR}"
+      exit 1
+    }
   fi
   info "Moved to ${TARGET_DIR}"
 
-  # Step 4: Re-exec from new location
+  # Step 4: Re-exec from new location (preserving original flags)
   echo ""
   echo "  Relocation complete. Re-executing from new location..."
-  exec "$TARGET_DIR/setup.sh" "$@"
+  exec "$TARGET_DIR/setup.sh" "${ORIGINAL_ARGS[@]}"
 fi
 
 # ── Phase 2: Prerequisites ──────────────────────────────────────────

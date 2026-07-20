@@ -21,7 +21,92 @@ echo -e "${CYAN}
 ║   ${SCRIPT_DIR}  ║
 ╚══════════════════════════════════════╝${NC}"
 
-# ── Phase 1: Prerequisites ──────────────────────────────────────────
+# ── Parse flags ─────────────────────────────────────────────────────
+AUTO_YES=0
+WITH_PYTHON=0
+WITH_SYSTEM=0
+REMAINING_ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    -y|--yes)      AUTO_YES=1 ;;
+    --with-python) WITH_PYTHON=1 ;;
+    --with-system) WITH_SYSTEM=1 ;;
+    *)             REMAINING_ARGS+=("$arg") ;;
+  esac
+done
+set -- "${REMAINING_ARGS[@]}"
+
+# ── Phase 1: Auto-relocation ───────────────────────────────────────
+header "Checking installation path"
+
+TARGET_DIR="${HOME}/.config/opencode"
+CURRENT_NAME="$(basename "$SCRIPT_DIR")"
+PARENT_DIR="$(dirname "$SCRIPT_DIR")"
+
+if [ "$SCRIPT_DIR" = "$TARGET_DIR" ]; then
+  info "Already at ${TARGET_DIR}"
+else
+  echo ""
+  echo "  This clone lives at: ${SCRIPT_DIR}"
+  echo "  OpenCode expects it at: ${TARGET_DIR}"
+  echo ""
+
+  # Step 1: Rename to 'opencode' if not already
+  if [ "$CURRENT_NAME" != "opencode" ]; then
+    echo "  Renaming ${CURRENT_NAME} → opencode..."
+    mv "$SCRIPT_DIR" "${PARENT_DIR}/opencode" 2>/dev/null || {
+      err "Failed to rename directory (permissions?)"
+      exit 1
+    }
+    SCRIPT_DIR="${PARENT_DIR}/opencode"
+    info "Renamed to opencode"
+  fi
+
+  # Step 2: Check if target already exists
+  if [ -d "$TARGET_DIR" ]; then
+    HAS_UNPUSHED=0
+    if [ -d "${TARGET_DIR}/.git" ]; then
+      GIT_DIR="${TARGET_DIR}/.git" git --git-dir="${TARGET_DIR}/.git" log --oneline @{u}..HEAD 2>/dev/null | grep -q . && HAS_UNPUSHED=1
+      GIT_DIR="${TARGET_DIR}/.git" git --git-dir="${TARGET_DIR}/.git" status --porcelain 2>/dev/null | grep -q . && HAS_UNPUSHED=1
+    fi
+
+    warn "${TARGET_DIR} already exists!"
+    if [ "$HAS_UNPUSHED" = 1 ]; then
+      echo "  ⚠  The existing directory has unpushed commits or dirty files!"
+      echo "  It will be PERMANENTLY REMOVED."
+    else
+      echo "  It will be PERMANENTLY REMOVED and replaced."
+    fi
+    echo ""
+
+    if [ "$AUTO_YES" != 1 ]; then
+      read -p "  Continue? [y/N] " -n 1 -r
+      echo ""
+      if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        err "Relocation aborted by user"
+        exit 1
+      fi
+    fi
+
+    rm -rf "$TARGET_DIR"
+    info "Removed existing ${TARGET_DIR}"
+  fi
+
+  # Step 3: Move to target (handles cross-filesystem)
+  mkdir -p "${HOME}/.config"
+  if ! mv "$SCRIPT_DIR" "$TARGET_DIR" 2>/dev/null; then
+    echo "  Cross-filesystem move detected, using copy..."
+    cp -a "$SCRIPT_DIR" "$TARGET_DIR" && rm -rf "$SCRIPT_DIR"
+  fi
+  info "Moved to ${TARGET_DIR}"
+
+  # Step 4: Re-exec from new location
+  echo ""
+  echo "  Relocation complete. Re-executing from new location..."
+  exec "$TARGET_DIR/setup.sh" "$@"
+fi
+
+# ── Phase 2: Prerequisites ──────────────────────────────────────────
 header "Checking prerequisites"
 
 command -v node >/dev/null 2>&1 || { err "node is required. Install from https://nodejs.org"; exit 1; }
@@ -43,7 +128,7 @@ fi
 command -v python3 >/dev/null 2>&1 || warn "python3 not found — ai-detector and PDF skill will not work"
 python3 --version 2>/dev/null && info "python3 $(python3 --version | cut -d' ' -f2)" || true
 
-# ── Phase 2: npm dependencies ──────────────────────────────────────
+# ── Phase 3: npm dependencies ──────────────────────────────────────
 header "Installing npm dependencies"
 
 cd "$SCRIPT_DIR"
@@ -54,7 +139,7 @@ else
   warn "package.json not found — skipping npm install"
 fi
 
-# ── Phase 3: Skill installation ─────────────────────────────────────
+# ── Phase 4: Skill installation ─────────────────────────────────────
 header "Installing skills"
 
 mkdir -p "$SKILLS_TARGET"
@@ -111,11 +196,11 @@ for skill in "${TERMINAL_SKILLS[@]}"; do
   fi
 done
 
-# ── Phase 4: Python dependencies (optional) ─────────────────────────
+# ── Phase 5: Python dependencies (optional) ─────────────────────────
 header "Python dependencies"
 
 if command -v python3 >/dev/null 2>&1; then
-  if [ "${1:-}" = "--with-python" ] || [ "${2:-}" = "--with-python" ]; then
+  if [ "$WITH_PYTHON" = 1 ]; then
     echo "  Installing Python packages for ML detection..."
     pip3 install transformers torch --quiet 2>/dev/null && \
       info "Python ML packages installed" || \
@@ -129,10 +214,10 @@ if command -v python3 >/dev/null 2>&1; then
   fi
 fi
 
-# ── Phase 5: System dependencies (optional) ─────────────────────────
+# ── Phase 6: System dependencies (optional) ─────────────────────────
 header "System dependencies"
 
-if [ "${1:-}" = "--with-system" ] || [ "${2:-}" = "--with-system" ]; then
+if [ "$WITH_SYSTEM" = 1 ]; then
   if command -v apt-get >/dev/null 2>&1; then
     echo "  Installing system packages..."
     sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils qpdf tesseract-ocr 2>/dev/null && \
@@ -150,7 +235,7 @@ else
   echo "  Skipping system packages (use --with-system to install)"
 fi
 
-# ── Phase 6: Environment variables ──────────────────────────────────
+# ── Phase 7: Environment variables ──────────────────────────────────
 header "Environment variables"
 
 MISSING_ENV=0
@@ -184,7 +269,7 @@ if [ "$MISSING_ENV" -eq 1 ]; then
   echo "  Set missing variables in your shell rc file or copy .env.example to .env and source it."
 fi
 
-# ── Phase 7: Summary ────────────────────────────────────────────────
+# ── Phase 8: Summary ────────────────────────────────────────────────
 header "Summary"
 
 LOCAL_REPO_SKILLS=()

@@ -15,6 +15,13 @@ warn()  { echo -e "${YELLOW}[!]${NC} $1"; }
 err()   { echo -e "${RED}[✗]${NC} $1"; }
 header(){ echo -e "\n${CYAN}━━━ $1 ━━━${NC}"; }
 
+is_windows() {
+  case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 echo -e "${CYAN}
 ╔══════════════════════════════════════╗
 ║   OpenCode Config Setup             ║
@@ -131,8 +138,17 @@ else
   exit 1
 fi
 
-command -v python3 >/dev/null 2>&1 || warn "python3 not found — ai-detector and PDF skill will not work"
-python3 --version 2>/dev/null && info "python3 $(python3 --version | cut -d' ' -f2)" || true
+PYTHON_CMD=""
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON_CMD="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_CMD="python"
+fi
+if [ -n "$PYTHON_CMD" ]; then
+  info "$PYTHON_CMD $($PYTHON_CMD --version | cut -d' ' -f2)"
+else
+  warn "python not found — ai-detector and PDF skill will not work"
+fi
 
 # ── Phase 3: npm dependencies ──────────────────────────────────────
 header "Installing npm dependencies"
@@ -191,14 +207,14 @@ done
 # ── Phase 5: Python dependencies (optional) ─────────────────────────
 header "Python dependencies"
 
-if command -v python3 >/dev/null 2>&1; then
+if [ -n "$PYTHON_CMD" ]; then
   if [ "$WITH_PYTHON" = 1 ]; then
     echo "  Installing Python packages for ML detection..."
-    python3 -m pip install transformers torch --quiet 2>/dev/null && \
+    $PYTHON_CMD -m pip install transformers torch --quiet 2>/dev/null && \
       info "Python ML packages installed" || \
       warn "Could not install transformers/torch"
     echo "  Installing Python packages for PDF skill..."
-    python3 -m pip install pypdf pdfplumber reportlab --quiet 2>/dev/null && \
+    $PYTHON_CMD -m pip install pypdf pdfplumber reportlab --quiet 2>/dev/null && \
       info "Python PDF packages installed" || \
       warn "Could not install PDF packages"
   else
@@ -211,17 +227,36 @@ header "System dependencies"
 
 if [ "$WITH_SYSTEM" = 1 ]; then
   if command -v apt-get >/dev/null 2>&1; then
-    echo "  Installing system packages..."
+    echo "  Installing system packages via apt-get..."
     sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils qpdf tesseract-ocr 2>/dev/null && \
       info "System packages installed" || \
       warn "Could not install all system packages"
-  elif command -v brew >/dev/null 2>&1; then
+  elif command -v pacman >/dev/null 2>&1; then
+    echo "  Installing system packages via pacman..."
+    sudo pacman -S --noconfirm poppler qpdf tesseract 2>/dev/null && \
+      info "System packages installed" || \
+      warn "Could not install all system packages"
+  elif command -v brew >/dev/null 2>&1 && ! is_windows; then
     echo "  Installing system packages via brew..."
     brew install poppler qpdf tesseract 2>/dev/null && \
       info "System packages installed" || \
       warn "Could not install all system packages"
+  elif command -v choco >/dev/null 2>&1; then
+    echo "  Installing system packages via choco..."
+    choco install -y poppler qpdf tesseract 2>/dev/null && \
+      info "System packages installed" || \
+      warn "Could not install all system packages"
   else
-    warn "No package manager detected — install manually: poppler-utils, qpdf, tesseract-ocr"
+    PKG_HINT=""
+    if is_windows; then
+      PKG_HINT="choco install -y poppler qpdf tesseract"
+    elif command -v pacman >/dev/null 2>&1; then
+      PKG_HINT="sudo pacman -S poppler qpdf tesseract"
+    else
+      PKG_HINT="sudo apt-get install poppler-utils qpdf tesseract-ocr"
+    fi
+    warn "No compatible package manager found — install manually:"
+    echo "  ${PKG_HINT}"
   fi
 else
   echo "  Skipping system packages (use --with-system to install)"
@@ -284,11 +319,18 @@ if [ ${#INSTALLED_SKILLS[@]} -eq 0 ]; then
   echo "    npx terminal-skills install <name>"
 fi
 
+SYS_DEPS_CMD="$0 --with-system"
+if is_windows; then
+  SYS_DEPS_CMD="choco install -y poppler qpdf tesseract"
+elif command -v pacman >/dev/null 2>&1; then
+  SYS_DEPS_CMD="sudo pacman -S poppler qpdf tesseract"
+fi
+
 info "Setup complete!"
 echo ""
 echo "  Next steps:"
 echo "    1. Source your env vars:     source .env (or add to ~/.bashrc)"
 echo "    2. Install Python deps:      $0 --with-python"
-echo "    3. Install system deps:      $0 --with-system"
+echo "    3. Install system deps:      ${SYS_DEPS_CMD}"
 echo "    4. Open OpenCode and verify skills are detected"
 echo ""

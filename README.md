@@ -102,7 +102,7 @@ This config uses the `@opencode-ai/plugin` npm package (v1.3.17), tracked in `pa
 | Agent | File | Purpose |
 |---|---|---|
 | **Main** | `agents/main-agent.md` | Primary general-purpose agent. |
-| **Student** | `agents/student.md` | Specialized agent configured to produce human-sounding, non-AI-detectable text. Uses the humanizer skill and ai-detector for self-verification. Temperature: 0.82. |
+| **Student** | `agents/student.md` | Academic agent with anti-hallucination research workflow, human-sounding output (humanizer + ai-detector), and source integrity enforcement. Temperature: 0.82. |
 | **Designer** | `agents/designer.md` | UI/UX agent. |
 | **Tester** | `agents/tester.md` | Software testing agent. |
 | **Plan** | `agents/plan.md` | Planning and task-breakdown agent. |

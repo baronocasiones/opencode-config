@@ -79,7 +79,6 @@ This config uses the `@opencode-ai/plugin` npm package (v1.3.17), tracked in `pa
 
 | Skill | Source | Purpose |
 |---|---|---|
-| **ai-image-generation** | [skills-collective/skills](https://github.com/skills-collective/skills) | Image generation via RunComfy CLI — FLUX 2, GPT Image 2, Seedream 5, and more. Used by the image-media-agent subagent. |
 | **humanizer** | [blader/humanizer](https://github.com/blader/humanizer) | Strips AI writing patterns from text. Removes inflated symbolism, promotional language, em dash overuse, hedging, and other detectable signals. |
 | **caveman** | terminal-skills | Ultra-compressed communication mode (cuts token usage ~75%). |
 | **create-readme** | terminal-skills | Creates README documentation for projects. |
@@ -103,7 +102,7 @@ This config uses the `@opencode-ai/plugin` npm package (v1.3.17), tracked in `pa
 | Agent | File | Purpose |
 |---|---|---|
 | **Main** | `agents/main-agent.md` | Primary general-purpose agent. |
-| **Student** | `agents/student.md` | Specialized agent configured to produce human-sounding, non-AI-detectable text. Uses the humanizer skill and ai-detector for self-verification. Temperature: 0.82. |
+| **Student** | `agents/student.md` | Academic agent with anti-hallucination research workflow, human-sounding output (humanizer + ai-detector), and source integrity enforcement. Temperature: 0.82. |
 | **Designer** | `agents/designer.md` | UI/UX agent. |
 | **Tester** | `agents/tester.md` | Software testing agent. |
 | **Plan** | `agents/plan.md` | Planning and task-breakdown agent. |
@@ -119,7 +118,7 @@ This config uses the `@opencode-ai/plugin` npm package (v1.3.17), tracked in `pa
 | **devops-agent** | CI/CD, Docker, deployment. |
 | **security-reviewer** | Code/config/dependency vulnerability audits. |
 | **accessibility-reviewer** | WCAG and inclusive design audits. |
-| **image-media-agent** | Diagrams, illustrations, visual assets + AI image generation via RunComfy (FLUX 2, GPT Image 2, etc.). |
+| **image-media-agent** | Diagrams, illustrations, and visual assets using SVG, Mermaid, and programmatic generation (free). |
 | **project-context-loader** | Project documentation loading and caching. |
 
 ## MCP Servers

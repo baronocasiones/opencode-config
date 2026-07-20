@@ -39,7 +39,9 @@ python3 ~/.config/opencode/skills/ai-detector/detect.py -f essay.txt
 
 ## Output
 
-The top-level `overall_score` and `weaknesses` are what the agent should read:
+The top-level `overall_score`, `verdict`, and `weaknesses` are what the agent should read.
+
+### Without `--hf` (heuristic only):
 
 ```json
 {
@@ -49,6 +51,28 @@ The top-level `overall_score` and `weaknesses` are what the agent should read:
   "weaknesses": ["Passive voice overuse"]
 }
 ```
+
+Top-level fields are copied from the heuristic result.
+
+### With `--hf` (heuristic + ML blended):
+
+```json
+{
+  "heuristic": { ... },
+  "ml": { ... },
+  "overall_score": 86.5,
+  "heuristic_weight": 37.9,
+  "ml_weight": 48.6,
+  "verdict": "Likely human-written",
+  "weaknesses": []
+}
+```
+
+Top-level `overall_score` is a **weighted blend** (40% heuristic + 60% ML).
+`heuristic_weight` and `ml_weight` show each component's contribution.
+`weaknesses` combines heuristic flaws with an ML-disagreement note if applicable.
+
+To read only the heuristic score (faster, consistent), reference `heuristic.overall_score` instead.
 
 ## Score Interpretation
 

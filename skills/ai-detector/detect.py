@@ -377,9 +377,38 @@ def main():
         ml_result = ml_detect(text)
         result['ml'] = ml_result
 
-    result['overall_score'] = heuristic['overall_score']
-    result['verdict'] = heuristic['verdict']
-    result['weaknesses'] = heuristic['weaknesses']
+        if 'error' not in ml_result:
+            # Weighted blend: 40% heuristic, 60% ML
+            blended = round(0.4 * heuristic['overall_score'] + 0.6 * ml_result['overall_score'], 1)
+            result['overall_score'] = blended
+            result['heuristic_weight'] = round(0.4 * heuristic['overall_score'], 1)
+            result['ml_weight'] = round(0.6 * ml_result['overall_score'], 1)
+
+            if blended >= 75:
+                result['verdict'] = 'Likely human-written'
+            elif blended >= 55:
+                result['verdict'] = 'Mixed / uncertain'
+            else:
+                result['verdict'] = 'Likely AI-generated'
+
+            # Weaknesses: heuristic weaknesses + ML note if it disagrees with heuristic
+            combined = list(heuristic['weaknesses'])
+            if ml_result['verdict'] != heuristic['verdict']:
+                combined.append(
+                    f'ML model disagrees with heuristic — flags as {ml_result["verdict"].lower()} '
+                    f'(ML: {ml_result["overall_score"]:.0f}, heuristic: {heuristic["overall_score"]:.0f}, '
+                    f'confidence: {ml_result["ml_raw"]["confidence"]:.0%})'
+                )
+            result['weaknesses'] = combined
+        else:
+            # ML failed, fall back to heuristic
+            result['overall_score'] = heuristic['overall_score']
+            result['verdict'] = heuristic['verdict']
+            result['weaknesses'] = heuristic['weaknesses']
+    else:
+        result['overall_score'] = heuristic['overall_score']
+        result['verdict'] = heuristic['verdict']
+        result['weaknesses'] = heuristic['weaknesses']
 
     print(json.dumps(result, indent=2))
 

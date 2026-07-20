@@ -145,7 +145,12 @@ elif command -v python >/dev/null 2>&1; then
   PYTHON_CMD="python"
 fi
 if [ -n "$PYTHON_CMD" ]; then
-  info "$PYTHON_CMD $($PYTHON_CMD --version | cut -d' ' -f2)"
+  PYTHON_VER=$($PYTHON_CMD --version 2>/dev/null | cut -d' ' -f2) || true
+  if [ -n "$PYTHON_VER" ]; then
+    info "$PYTHON_CMD $PYTHON_VER"
+  else
+    info "$PYTHON_CMD (version check failed)"
+  fi
 else
   warn "python not found — ai-detector and PDF skill will not work"
 fi

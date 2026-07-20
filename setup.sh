@@ -66,8 +66,8 @@ else
   if [ -d "$TARGET_DIR" ]; then
     HAS_UNPUSHED=0
     if [ -d "${TARGET_DIR}/.git" ]; then
-      GIT_DIR="${TARGET_DIR}/.git" git --git-dir="${TARGET_DIR}/.git" log --oneline @{u}..HEAD 2>/dev/null | grep -q . && HAS_UNPUSHED=1
-      GIT_DIR="${TARGET_DIR}/.git" git --git-dir="${TARGET_DIR}/.git" status --porcelain 2>/dev/null | grep -q . && HAS_UNPUSHED=1
+      git -C "$TARGET_DIR" log --oneline @{u}..HEAD 2>/dev/null | grep -q . && HAS_UNPUSHED=1
+      git -C "$TARGET_DIR" status --porcelain 2>/dev/null | grep -q . && HAS_UNPUSHED=1
     fi
 
     warn "${TARGET_DIR} already exists!"

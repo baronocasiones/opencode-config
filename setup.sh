@@ -188,11 +188,11 @@ header "Python dependencies"
 if command -v python3 >/dev/null 2>&1; then
   if [ "$WITH_PYTHON" = 1 ]; then
     echo "  Installing Python packages for ML detection..."
-    pip3 install transformers torch --quiet 2>/dev/null && \
+    python3 -m pip install transformers torch --quiet 2>/dev/null && \
       info "Python ML packages installed" || \
       warn "Could not install transformers/torch"
     echo "  Installing Python packages for PDF skill..."
-    pip3 install pypdf pdfplumber reportlab --quiet 2>/dev/null && \
+    python3 -m pip install pypdf pdfplumber reportlab --quiet 2>/dev/null && \
       info "Python PDF packages installed" || \
       warn "Could not install PDF packages"
   else

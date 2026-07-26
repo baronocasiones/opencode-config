@@ -6,7 +6,7 @@ Personal OpenCode configuration — custom agents, MCP servers, skills, and a `s
 
 ```bash
 git clone <repo-url>
-cd opencode   # or whatever the clone directory is named
+cd opencode
 ./setup.sh
 ```
 
@@ -43,6 +43,26 @@ All three can be combined:
 ```bash
 ./setup.sh -y --with-python --with-system
 ```
+
+### Windows (Git Bash + Chocolatey) setup
+
+The script natively detects Git Bash / MSYS2 / Cygwin via `uname -s` and handles Windows paths and cross-filesystem moves correctly. To get started on Windows:
+
+**Prerequisites:**
+- [Git for Windows](https://git-scm.com) (provides Git Bash)
+- [Node.js](https://nodejs.org) — `choco install nodejs`
+- [Chocolatey](https://chocolatey.org/install) — required for `--with-system` flag
+
+**Run:**
+```bash
+# Basic setup (npm + skills) — any Git Bash terminal
+./setup.sh
+
+# Full setup with system deps — requires elevated (Run as Administrator) Git Bash
+./setup.sh -y --with-system --with-python
+```
+
+The script will auto-detect Chocolatey and run `choco install -y poppler qpdf tesseract` when `--with-system` is passed. Python is detected as `python` (not `python3`) on Windows — the fallback is built in.
 
 ## How `setup.sh` Works
 

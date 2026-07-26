@@ -24,8 +24,8 @@ is_windows() {
 
 echo -e "${CYAN}
 ╔══════════════════════════════════════╗
-║   OpenCode Config Setup             ║
-║   ${SCRIPT_DIR}  ║
+║   OpenCode Config Setup              ║
+║   ${SCRIPT_DIR}       ║
 ╚══════════════════════════════════════╝${NC}"
 
 # ── Parse flags ─────────────────────────────────────────────────────

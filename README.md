@@ -115,6 +115,26 @@ This config uses the `@opencode-ai/plugin` npm package (v1.3.17), tracked in `pa
 | **supabase-postgres-best-practices** | terminal-skills | Postgres performance optimization from Supabase. |
 | **ui-ux-pro-max** | terminal-skills | Comprehensive UI/UX design with 50+ styles, 161 palettes, 57 font pairings. |
 
+## Commands
+
+Custom slash commands defined in `commands/`:
+
+| Command | File | Purpose |
+|---|---|---|
+| **/end** | `commands/end.md` | Auto-archive session. Analyzes changes, updates `docs/*.md` (additive only), appends session history to local project `AGENTS.md`. Creates local `AGENTS.md` via `/init` if missing. |
+| **/start** | `commands/start.md` | Load module context based on session goal. Reads local `AGENTS.md` and `docs/` files, displays current state, and sets up session context. Usage: `/start implement the payment module` |
+
+### State-Freeze Workflow
+
+This config supports multi-session module-by-module development (optimized for MiMo v2.5 free):
+
+1. **Work on a module** — code, test, implement
+2. **`/end`** — archive session state to `docs/*.md` and local `AGENTS.md`
+3. **Start new session** — context is clean, rate limits reset
+4. **`/start <instruction>`** — load previous context and continue
+
+Session history accumulates in the local project `AGENTS.md`, keeping the global config clean.
+
 ## Agents
 
 ### Main agents (`agents/`)
@@ -153,6 +173,7 @@ Configured in `opencode.json`:
 | **chrome-devtools-mcp** | Local | Browser automation, screenshots, performance traces |
 | **google-stitch-mcp** | Remote | UI generation and editing via Gemini, needs `GOOGLE_STITCH_MCP_TOKEN` |
 | **github-mcp** | Remote | GitHub API (disabled by default), needs `GITHUB_MCP_TOKEN` |
+| **sap-fiori-extractor** | Local | SAP Fiori automation via Chrome DevTools, needs port 9224 |
 
 ### Required environment variables
 
@@ -170,13 +191,16 @@ export GITHUB_MCP_TOKEN="your_github_token"
 
 ```
 ~/.config/opencode/
-├── AGENTS.md              # Agent behavior rules
+├── AGENTS.md              # Agent behavior rules + workflow directives
 ├── README.md              # This file
 ├── opencode.json          # MCP server config
 ├── tui.json               # Terminal UI config
 ├── package.json           # npm dependencies (@opencode-ai/plugin)
 ├── setup.sh               # Bootstrap script
 ├── .env.example           # Env var template
+├── commands/
+│   ├── end.md             # /end — archive session state
+│   └── start.md           # /start — load module context
 ├── agents/
 │   ├── main-agent.md
 │   ├── student.md

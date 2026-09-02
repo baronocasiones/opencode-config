@@ -35,13 +35,19 @@
       "url": "https://stitch.googleapis.com/mcp",
       "oauth": {},
       "headers": {
-          "X-Goog-Api-Key": "{env:GOOGLE_STITCH_MCP_TOKEN}"
+        "X-Goog-Api-Key": "{env:GOOGLE_STITCH_MCP_TOKEN}"
       },
       "timeout": 120000
     },
     "framelink-figma-mcp": {
       "type": "local",
-      "command": ["npx", "-y", "figma-developer-mcp", "--figma-api-key={env:FIGMA_MCP_TOKEN}", "--stdio"],
+      "command": [
+        "npx",
+        "-y",
+        "figma-developer-mcp",
+        "--figma-api-key={env:FIGMA_MCP_TOKEN}",
+        "--stdio"
+      ],
       "enabled": true
     },
     "chrome-devtools-mcp": {
@@ -49,8 +55,19 @@
       "command": [
         "npx",
         "-y",
-        "chrome-devtools-mcp@latest"
+        "chrome-devtools-mcp@latest",
+        "--chromeArg=--remote-debugging-port=9224"
       ]
+    },
+    "sap-fiori-extractor": {
+      "type": "local",
+      "command": [
+        "node",
+        "/mnt/hdd/repo/sap/sap-fiori-extractor/src/index.js"
+      ],
+      "env": {
+        "SAP_EXTRACTOR_PORT": "9224"
+      }
     }
   }
 }

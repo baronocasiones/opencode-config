@@ -5,7 +5,7 @@ Personal OpenCode configuration — custom agents, MCP servers, skills, and a `s
 ## Quickstart
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/baronocasiones/opencode-config.git
 cd opencode
 ./setup.sh
 ```

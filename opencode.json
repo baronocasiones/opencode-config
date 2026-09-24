@@ -1,5 +1,15 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "command": {
+    "end": {
+      "description": "Archive session state to docs and update local AGENTS.md",
+      "template": "Execute the End protocol.\n\n1. Analyze this session: all file changes, API endpoints defined, dependencies added, conventions established, patterns used.\n\n2. For each relevant module, update the corresponding file in docs/:\n   - Create the file if it does not exist\n   - Append only — never remove existing content\n   - Only update files relevant to what was actually changed\n\n3. Check if a local AGENTS.md exists in the project root. If not, invoke the /init command to create it. Then append a session entry under ## Session History with:\n   - Date and module name\n   - What was implemented\n   - Any new conventions or patterns established\n\n4. Print: \"[end] Session archived. docs/ updated. AGENTS.md updated.\""
+    },
+    "start": {
+      "description": "Load module context based on session goal",
+      "template": "Execute the Start protocol with this instruction: $ARGUMENTS\n\n1. Parse the instruction to identify the target module and session goal.\n\n2. Read the local AGENTS.md in the project root for session history. If it exists, note the most recent sessions and conventions.\n\n3. Read the corresponding docs/ file for that module. If it does not exist, report that and ask what to work on.\n\n4. If the file exists, display:\n   - Current state of the module\n   - What has been completed across previous sessions\n   - What remains to be done\n   - Any conventions or patterns established for this module\n\n5. Set up context and wait for instructions. Do not begin work until the user confirms."
+    }
+  },
   "provider": {
     "github-copilot": {
       "enabled": true

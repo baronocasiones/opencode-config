@@ -5,6 +5,14 @@ temperature: 0.4
 permission:
   edit: deny
   bash: deny
+  # zen free-tier gatekeeper 403s ("free tier can only be used from within
+  # OpenCode") if the `bash` tool is missing from the request payload, which a
+  # plain `bash: deny` causes (denied tools are stripped client-side).
+  # The rule below keeps `bash` declared while still auto-denying every call:
+  # only a rule with literal pattern "*" triggers tool stripping, and "**"
+  # matches every command at ask-time, so no prompt is shown and nothing runs.
+  "bash*":
+    "**": deny
   webfetch: allow
   skill:
     "*": "deny"

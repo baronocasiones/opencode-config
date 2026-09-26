@@ -5,6 +5,11 @@ temperature: 0.7
 permission:
   edit: allow
   bash: deny
+  # keep `bash` declared for the zen free-tier gatekeeper (a plain `bash: deny`
+  # strips the tool and triggers 403 "free tier can only be used from within
+  # OpenCode"); "**" still auto-denies every call without prompting.
+  "bash*":
+    "**": deny
   webfetch: allow
   skill:
     "ui-*": "allow"
